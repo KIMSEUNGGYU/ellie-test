@@ -5,7 +5,7 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "jest --watchAll",
+    "test": "cross-env DOTENV_CONFIG_PATH=./.env.test jest --watchAll",
     "start": "nodemon app"
   },
   "author": "Dream Coding Academy",
@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.17.7",
+    "cross-env": "^7.0.3",
     "jest": "^27.5.1",
     "node-mocks-http": "^1.11.0",
     "nodemon": "^2.0.7"
