@@ -49,6 +49,46 @@ describe("Auth APIs", () => {
       expect(res.status).toBe(409);
       expect(res.data.message).toBe(`${user.username} already exists`);
     });
+
+    // router.post('/signup', validateSignup, authController.signup);
+    // 여기까지 보면 authController.signup 의 기능은 테스트했지만, validateSignup 부분은 아직 테스트 하지 않음
+    // 해당 부분 테스트 validate
+    // jest 에서 변수는 $ 표시 사용
+    test.each([
+      { missingFiledName: "name", expectedMessage: "name is missing" },
+      {
+        missingFiledName: "username",
+        expectedMessage: "username should be at least 5 characters",
+      },
+      { missingFiledName: "email", expectedMessage: "invalid email" },
+      {
+        missingFiledName: "password",
+        expectedMessage: "password should be at least 5 characters",
+      },
+    ])(
+      `returns 400 when $missingFiledName filed is missing`,
+      async ({ missingFiledName, expectedMessage }) => {
+        const user = makeValidUserDetails();
+        delete user[missingFiledName];
+
+        const res = await request.post("/auth/signup", user);
+
+        expect(res.status).toBe(400);
+        expect(res.data.message).toBe(expectedMessage);
+      }
+    );
+
+    it("returns 400 when password is too short", async () => {
+      const user = {
+        ...makeValidUserDetails(),
+        password: "123",
+      };
+
+      const res = await request.post("/auth/signup", user);
+
+      expect(res.status).toBe(400);
+      expect(res.data.message).toBe("password should be at least 5 characters");
+    });
   });
 });
 
