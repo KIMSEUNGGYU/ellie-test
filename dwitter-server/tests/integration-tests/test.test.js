@@ -1,4 +1,48 @@
-describe('Auth APIs', () => {
+// 테스트 전! 서버 시작 및 데이터베이스 초기화! 설정!
+// 테스트 후! 데이터 베이스 깨끗하게 청소해 놓기!
+
+import axios from "axios";
+import faker from "faker";
+
+import { startServer, stopServer } from "../../app.js";
+import { sequelize } from "../../db/database.js";
+
+describe("Auth APIs", () => {
   let server;
-  beforeAll(() => {});
+  let request;
+  beforeAll(async () => {
+    server = await startServer();
+    request = axios.create({
+      baseURL: "http://localhost:8080",
+      validateStatus: null,
+      // validateStatus null 로 설정 이유는 axios 는 200은 정상, 그 외 300, 400대는 에러를 처리함
+      // 하지만 테스트 할 때는 200 뿐만 아니라 300, 400 모두 의도한 것이기 때문에 error 로 처리하지 않기 위함
+    });
+  });
+
+  afterAll(async () => {
+    await sequelize.drop(); // sequelize 가 만든 테이블을 다 삭제함
+    await stopServer(server);
+  });
+
+  // afterAll, beforeAll 인 경우, each 로 안하는 이유, each로 하면 정말 독립적인 환경에서 돌아가는 것과 같음
+  // 하지만 모든 테스트 각각 마다 서버시작, db 싱크, db 지우기, 서버 끄기 와 같은 기능을 매 테스트마다 하면 성능적으로 비효율
+  // all 로 auth 와 같은 특정 테스트가 시작할 때 끝날 때 동작하도록 하고, 대신!! 테스트 작성할 때 개별적으로 테스트되므로 명심해서 테스트 코드를 작성해야 함
+
+  describe("POST to /auth/signup", () => {
+    it("returns 201 and authorization token when user details are valid", async () => {
+      const fakeUser = faker.helpers.userCard();
+      const user = {
+        name: fakeUser.name,
+        username: fakeUser.username,
+        email: fakeUser.email,
+        password: faker.internet.password(10, true),
+      };
+
+      const res = await request.post("/auth/signup", user);
+
+      expect(res.status).toBe(201);
+      expect(res.data.token.length).toBeGreaterThan(0);
+    });
+  });
 });

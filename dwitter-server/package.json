@@ -5,9 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose",
-    "test:unit": "DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose --testPathIgnorePatterns=/tests/integration-tests",
-    "test:integration": "DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose --testPathPattern=/tests/integration-tests",
+    "test": "cross-env DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose",
+    "test:unit": "cross-env DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose --testPathIgnorePatterns=/tests/integration-tests",
+    "test:integration": "cross-env DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose --testPathPattern=/tests/integration-tests",
     "start": "nodemon index"
   },
   "author": "Dream Coding Academy",
@@ -30,6 +30,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.16.0",
     "@types/jest": "^27.0.3",
     "axios": "^0.24.0",
+    "cross-env": "^7.0.3",
     "faker": "^5.5.3",
     "jest": "^27.4.0",
     "node-mocks-http": "^1.11.0",
