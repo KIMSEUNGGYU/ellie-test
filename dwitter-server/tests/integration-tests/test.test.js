@@ -90,6 +90,70 @@ describe("Auth APIs", () => {
       expect(res.data.message).toBe("password should be at least 5 characters");
     });
   });
+
+  describe("POST to /auth/login", () => {
+    it("returns 200 and authorization token when user credentials are valid", async () => {
+      const user = await createNewUserAccount();
+
+      const res = await request.post("/auth/login", {
+        username: user.username,
+        password: user.password,
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.data.token.length).toBeGreaterThan(0);
+    });
+
+    it("returns 401 when password is incorrect", async () => {
+      const user = await createNewUserAccount();
+      const wrongPassword = user.password.toUpperCase();
+
+      const res = await request.post("/auth/login", {
+        username: user.username,
+        password: wrongPassword,
+      });
+
+      expect(res.status).toBe(401);
+      expect(res.data.message).toMatch("Invalid user or password");
+    });
+
+    it("returns 401 when username is not found", async () => {
+      const someRandomNonExistentUser = faker.random.alpha({ count: 32 });
+
+      const res = await request.post("/auth/login", {
+        username: someRandomNonExistentUser,
+        password: faker.internet.password(10, true),
+      });
+
+      expect(res.status).toBe(401);
+      expect(res.data.message).toMatch("Invalid user or password");
+    });
+  });
+
+  describe("GET /auth/me", () => {
+    it("returns user details when valid token is present in Authorization header", async () => {
+      const user = await createNewUserAccount();
+
+      const res = await request.get("/auth/me", {
+        headers: { Authorization: `Bearer ${user.jwt}` },
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.data).toMatchObject({
+        username: user.username,
+        token: user.jwt,
+      });
+    });
+  });
+
+  async function createNewUserAccount() {
+    const userDetails = makeValidUserDetails();
+    const prepareUserResponse = await request.post("/auth/signup", userDetails);
+    return {
+      ...userDetails,
+      jwt: prepareUserResponse.data.token,
+    };
+  }
 });
 
 function makeValidUserDetails() {
