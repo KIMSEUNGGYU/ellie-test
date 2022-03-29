@@ -18,6 +18,7 @@ jest.mock("jsonwebtoken");
 jest.mock("../../data/auth.js");
 
 describe("Auth Middleware", () => {
+  // context - 실패
   it("returns 401 for the request without Authorization header", async () => {
     const request = httpMocks.createRequest({
       method: "GET",
@@ -90,5 +91,28 @@ describe("Auth Middleware", () => {
     expect(response.statusCode).toBe(401);
     expect(response._getJSONData().message).toBe("Authentication Error");
     expect(next).not.toBeCalled();
+  });
+
+  // context - 성공
+  it("passes a request with valid Authorization header with token", async () => {
+    const token = faker.random.alphaNumeric(128);
+    const userId = faker.random.alphaNumeric(32);
+    const request = httpMocks.createRequest({
+      method: "GET",
+      url: "/tweets",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const response = httpMocks.createResponse();
+    const next = jest.fn();
+    // ✨🔥 jwt 및, userRepository mocking 해서 사용
+    jwt.verify = jest.fn((token, secret, callback) => {
+      callback(undefined, { id: userId });
+    });
+    userRepository.findById = jest.fn((id) => Promise.resolve({ id }));
+
+    await isAuth(request, response, next);
+
+    expect(request).toMatchObject({ userId, token });
+    expect(next).toHaveBeenCalledTimes(1);
   });
 });
