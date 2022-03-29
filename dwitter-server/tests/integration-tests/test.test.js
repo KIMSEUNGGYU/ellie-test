@@ -31,18 +31,33 @@ describe("Auth APIs", () => {
 
   describe("POST to /auth/signup", () => {
     it("returns 201 and authorization token when user details are valid", async () => {
-      const fakeUser = faker.helpers.userCard();
-      const user = {
-        name: fakeUser.name,
-        username: fakeUser.username,
-        email: fakeUser.email,
-        password: faker.internet.password(10, true),
-      };
+      const user = makeValidUserDetails();
 
       const res = await request.post("/auth/signup", user);
 
       expect(res.status).toBe(201);
       expect(res.data.token.length).toBeGreaterThan(0);
     });
+
+    it("returns 409 when username has already been taken", async () => {
+      const user = makeValidUserDetails();
+      const firstSignup = await request.post("/auth/signup", user);
+      expect(firstSignup.status).toBe(201);
+
+      const res = await request.post("/auth/signup", user);
+
+      expect(res.status).toBe(409);
+      expect(res.data.message).toBe(`${user.username} already exists`);
+    });
   });
 });
+
+function makeValidUserDetails() {
+  const fakeUser = faker.helpers.userCard();
+  return {
+    name: fakeUser.name,
+    username: fakeUser.username,
+    email: fakeUser.email,
+    password: faker.internet.password(10, true),
+  };
+}
