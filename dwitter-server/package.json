@@ -5,9 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "cross-env DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose",
+    "test": "cross-env DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose --globalTeardown=./tests/integration-tests/global-teardown.js",
     "test:unit": "cross-env DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose --testPathIgnorePatterns=/tests/integration-tests",
-    "test:integration": "cross-env DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose --testPathPattern=/tests/integration-tests",
+    "test:integration": "cross-env DOTENV_CONFIG_PATH=./.env.test jest --watchAll --verbose --testPathPattern=/tests/integration-tests --globalTeardown=./tests/integration-tests/global-teardown.js",
     "start": "nodemon index"
   },
   "author": "Dream Coding Academy",
